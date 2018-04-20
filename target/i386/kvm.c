@@ -407,6 +407,10 @@ uint32_t kvm_arch_get_supported_cpuid(KVMState *s, uint32_t function,
         ret = get_para_features(s);
     }
 
+    // Jupark	
+    //if (function == 18)
+    //fprintf(stderr, "Jupark, QEMU %s function is %d, index %d \n", __func__, function,index);
+
     return ret;
 }
 
@@ -863,6 +867,8 @@ int kvm_arch_init_vcpu(CPUState *cs)
                 cpu_x86_cpuid(env, i, j, &c->eax, &c->ebx, &c->ecx, &c->edx);
                 c = &cpuid_data.entries[cpuid_i++];
             }
+	    //Jupark
+	    fprintf(stderr, "%s is called %x %x %x %x\n",__func__,c->eax,c->ebx,c->ecx,c->edx);
             break;
         default:
             c->function = i;

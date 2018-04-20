@@ -58,6 +58,7 @@ struct PCMachineState {
     ram_addr_t below_4g_mem_size, above_4g_mem_size;
 
     ram_addr_t epc_size, epc_base;
+    ram_addr_t o_epc_size, o_epc_base;
     OnOffAuto epc_below_4g;
 
     /* CPU and apic information: */

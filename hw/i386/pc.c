@@ -1364,6 +1364,7 @@ void pc_memory_init(PCMachineState *pcms,
     MemoryRegion *ram, *option_rom_mr;
     MemoryRegion *ram_below_4g, *ram_above_4g;
     MemoryRegion *epc;
+    MemoryRegion *o_epc;
     FWCfgState *fw_cfg;
     MachineState *machine = MACHINE(pcms);
     PCMachineClass *pcmc = PC_MACHINE_GET_CLASS(pcms);
@@ -1397,9 +1398,17 @@ void pc_memory_init(PCMachineState *pcms,
     }
     if (pcms->epc_size > 0) {
         epc = g_malloc(sizeof(*epc));
+        o_epc = g_malloc(sizeof(*o_epc));
+	
+        error_report("jUpark, QEMU: function  %s %lu %lu\n",__func__, pcms->epc_base, pcms->epc_size);
+        error_report("jUpark, QEMU: function  %s %lu %lu\n",__func__, pcms->o_epc_base, pcms->o_epc_size);
         memory_region_init(epc, OBJECT(pcms), "epc", pcms->epc_size);
         memory_region_add_subregion(system_memory, pcms->epc_base, epc);
         e820_add_entry(pcms->epc_base, pcms->epc_size, E820_RESERVED);
+	//Jupark init o_epc region with memory_region
+        memory_region_init(o_epc, OBJECT(pcms), "o_epc", pcms->o_epc_size);
+        memory_region_add_subregion(system_memory, pcms->o_epc_base, o_epc);
+        e820_add_entry(pcms->o_epc_base, pcms->o_epc_size, E820_RESERVED);
     }
 
     if (!pcmc->has_reserved_memory &&
@@ -1432,6 +1441,7 @@ void pc_memory_init(PCMachineState *pcms,
         }
 
         if (pcms->epc_base >= 0x100000000ULL) {
+            error_report("jUpark, QEMU: function  %s hot plus epc base?\n",__func__);
             pcms->hotplug_memory.base = pcms->epc_base + pcms->epc_size;
         } else {
             pcms->hotplug_memory.base = 0x100000000ULL + pcms->above_4g_mem_size;
@@ -2409,6 +2419,7 @@ void pc_machine_init_sgx_epc(MachineState *machine, ram_addr_t max_below_4g)
     if (!pcms->epc_size) {
         return;
     }
+    error_report("Jupark, QEMU: %s %lu",__func__,max_below_4g);
 
     if (!kvm_enabled()) {
         error_report("Machine option '" PC_MACHINE_EPC_SIZE "' requires KVM");
@@ -2429,6 +2440,9 @@ void pc_machine_init_sgx_epc(MachineState *machine, ram_addr_t max_below_4g)
     if (pcms->epc_below_4g != ON_OFF_AUTO_OFF) {
         if ((pcms->below_4g_mem_size + pcms->epc_size) <= max_below_4g) {
             pcms->epc_base = pcms->below_4g_mem_size;
+	    //Jupark
+	    pcms->o_epc_base = pcms->epc_base + pcms->epc_size;
+	    pcms->o_epc_size = pcms->epc_size;
         } else if (pcms->epc_below_4g == ON_OFF_AUTO_ON) {
             error_report("Machine options "
                 PC_MACHINE_MAX_RAM_BELOW_4G "=0x" RAM_ADDR_FMT ", "

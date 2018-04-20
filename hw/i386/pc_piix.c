@@ -147,6 +147,7 @@ static void pc_init1(MachineState *machine,
             pcms->below_4g_mem_size = machine->ram_size;
         }
         if (pcmc->pci_enabled) {
+            warn_report("Jupark, QEMU: %s is the first step to init_epc\n",__func__);
             pc_machine_init_sgx_epc(machine, 0xe0000000);
         }
     }
