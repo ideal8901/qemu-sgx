@@ -158,21 +158,44 @@ bool kvm_enable_x2apic(void)
 }
 
 #ifdef KVM_CAP_X86_VIRTUAL_EPC
+bool kvm_has_virtual_o_epc(MachineState *machine)
+{
+    KVMState *s = KVM_STATE(machine->accelerator);
+    return kvm_vm_check_extension(s, KVM_CAP_X86_VIRTUAL_O_EPC);
+}
+
 bool kvm_has_virtual_epc(MachineState *machine)
 {
     KVMState *s = KVM_STATE(machine->accelerator);
     return kvm_vm_check_extension(s, KVM_CAP_X86_VIRTUAL_EPC);
 }
 
+int kvm_enable_virtual_o_epc(MachineState *machine)
+{
+    PCMachineState *pcms = PC_MACHINE(machine);
+    KVMState *s = KVM_STATE(machine->accelerator);
+    int ret;
+
+    ret = kvm_vm_enable_cap(s, KVM_CAP_X86_VIRTUAL_O_EPC, 0,
+                                pcms->o_epc_base, pcms->o_epc_size);
+    if (ret) {
+        error_report("KVM enable virtual OEPC failed: %s", strerror(errno));
+    }
+    return ret;
+}
+
 int kvm_enable_virtual_epc(MachineState *machine)
 {
     PCMachineState *pcms = PC_MACHINE(machine);
     KVMState *s = KVM_STATE(machine->accelerator);
-    int ret = kvm_vm_enable_cap(s, KVM_CAP_X86_VIRTUAL_EPC, 0,
+    int ret;
+
+    ret = kvm_vm_enable_cap(s, KVM_CAP_X86_VIRTUAL_EPC, 0,
                                 pcms->epc_base, pcms->epc_size);
     if (ret) {
         error_report("KVM enable virtual EPC failed: %s", strerror(errno));
     }
+
     return ret;
 }
 #endif
@@ -409,7 +432,7 @@ uint32_t kvm_arch_get_supported_cpuid(KVMState *s, uint32_t function,
 
     // Jupark	
     //if (function == 18)
-    //fprintf(stderr, "Jupark, QEMU %s function is %d, index %d \n", __func__, function,index);
+    //	fprintf(stderr, "Jupark, QEMU %s function is %d, index %d \n", __func__, function,index);
 
     return ret;
 }
@@ -860,7 +883,7 @@ int kvm_arch_init_vcpu(CPUState *cs)
             break;
         case 0x12:
             /* Need 3 sub-leafs for SGX leaf (CPUID 0x12) */
-            for (j = 0; j <= 2; j++) {
+            for (j = 0; j <= 3; j++) {
                 c->function = i;
                 c->flags = KVM_CPUID_FLAG_SIGNIFCANT_INDEX;
                 c->index = j;

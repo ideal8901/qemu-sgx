@@ -413,6 +413,28 @@ void pc_madt_cpu_entry(AcpiDeviceIf *adev, int uid,
     }
 }
 
+//static void build_o_epc(Aml *scope, uint64_t epc_base, uint64_t epc_size)
+//{
+//    Aml *dev, *crs, *sta;
+//
+//    dev = aml_device("OEPC");
+//    aml_append(dev, aml_name_decl("_HID", aml_eisaid("INT0E0D")));
+//    aml_append(dev, aml_name_decl("_STR", aml_unicode("Outer Enclave Page Cache")));
+//
+//    crs = aml_resource_template();
+//    aml_append(crs,
+//               aml_qword_memory(AML_POS_DECODE, AML_MIN_FIXED, AML_MAX_FIXED,
+//                                AML_NON_CACHEABLE, AML_READ_WRITE, 0, epc_base,
+//                                epc_base + epc_size - 1, 0, epc_size));
+//    aml_append(dev, aml_name_decl("_CRS", crs));
+//
+//    sta = aml_method("_STA", 0, AML_SERIALIZED);
+//    aml_append(sta, aml_return(aml_int(0x0F)));
+//    aml_append(dev, sta);
+//
+//    aml_append(scope, dev);
+//}
+
 static void build_epc(Aml *scope, uint64_t epc_base, uint64_t epc_size)
 {
     Aml *dev, *crs, *sta;
@@ -2248,6 +2270,7 @@ build_dsdt(GArray *table_data, BIOSLinker *linker,
     }
     if (pcms->epc_size) {
         build_epc(sb_scope, pcms->epc_base, pcms->epc_size);
+        //build_o_epc(sb_scope, pcms->o_epc_base, pcms->o_epc_size);
     }
     aml_append(dsdt, sb_scope);
 

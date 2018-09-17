@@ -199,7 +199,15 @@ static void pc_init1(MachineState *machine,
     if (pcmc->pci_enabled) {
         ram_addr_t pci_hole_32_start;
         if (pcms->epc_size > 0 && pcms->epc_base < 0x100000000ULL) {
+	    //Jupark 
             pci_hole_32_start = pcms->epc_base + pcms->epc_size;
+//	    if(pcms->o_epc_size > 0 && pcms->o_epc_base < 0x100000000ULL)
+//	    {
+//            	pci_hole_32_start = pcms->o_epc_base + pcms->o_epc_size;
+//	    }
+//	    else{
+//            	pci_hole_32_start = pcms->epc_base + pcms->epc_size;
+//	    }
         } else {
             pci_hole_32_start = pcms->below_4g_mem_size;
         }

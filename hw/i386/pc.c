@@ -2425,9 +2425,16 @@ void pc_machine_init_sgx_epc(MachineState *machine, ram_addr_t max_below_4g)
         error_report("Machine option '" PC_MACHINE_EPC_SIZE "' requires KVM");
         exit(EXIT_FAILURE);
     }
+
     if (!kvm_has_virtual_epc(MACHINE(pcms))) {
         error_report("Machine option '" PC_MACHINE_EPC_SIZE "' requires KVM "
             " virtual EPC capability");
+        exit(EXIT_FAILURE);
+    }
+
+    if (!kvm_has_virtual_o_epc(MACHINE(pcms))) {
+        error_report("Machine option '" PC_MACHINE_EPC_SIZE "' requires KVM "
+            " virtual OEPC capability");
         exit(EXIT_FAILURE);
     }
 
@@ -2464,6 +2471,9 @@ void pc_machine_init_sgx_epc(MachineState *machine, ram_addr_t max_below_4g)
     }
 
     if (kvm_enable_virtual_epc(machine)) {
+        exit(EXIT_FAILURE);
+    }
+    if (kvm_enable_virtual_o_epc(machine)) {
         exit(EXIT_FAILURE);
     }
 }

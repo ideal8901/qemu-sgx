@@ -2972,7 +2972,7 @@ void cpu_x86_cpuid(CPUX86State *env, uint32_t index, uint32_t count,
         *ebx = kvm_arch_get_supported_cpuid(kvm_state, 0x12, count, R_EBX);
         *ecx = kvm_arch_get_supported_cpuid(kvm_state, 0x12, count, R_ECX);
         *edx = kvm_arch_get_supported_cpuid(kvm_state, 0x12, count, R_EDX);
-        //fprintf(stderr, "Jupark, QEMU: %s, count %d register %x %x %x %x\n", __func__,count,*eax,*ebx,*ecx,*edx);
+        fprintf(stderr, "Jupark, QEMU: %s, count %d register %x %x %x %x\n", __func__,count,*eax,*ebx,*ecx,*edx);
         break;
     case 0x40000000:
         /*
